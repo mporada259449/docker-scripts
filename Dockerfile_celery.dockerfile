@@ -1,22 +1,12 @@
-FROM python@sha256:827ab09571b0d22c75e97e2a569703149d39d535d4a71dc6ea6221b0c9821da9
+FROM python@sha256:729a76e129b717cf784b40a65938aeb7e025259b1b35e7c8c2ff6c3419d1245c
 
-WORKDIR /celery
+RUN useradd -ms /bin/bash celery
+RUN usermod -aG celery celery
 
-COPY ./django_app/django_app/celery_worker.py /celery/django_app
-COPY ./django_app/requirements.txt /celery/
-COPY ./django_app/calculator/calculator.py /celery/calculator/
+COPY  --chown=celery:celery ./django_app/ /celery/django_app
 
+WORKDIR /celery/django_app
 RUN pip install -r requirements.txt
 
-CMD ["celery", "-A", "django_app.celery_worker", "worker", "l", "info"]
-
-
-#COPY /home/dev/docker-project/django_app/django_app/celery_worker.py /celery/django_app/
-#COPY /home/dev/docker-project/django_app/django_app/settings.py /celery/django_app/
-#COPY /home/dev/docker-project/django_app/calculator/calculator.py /celery/calculator/
-#COPY /home/dev/docker-project/django_app/.env /celery/
-#COPY /home/dev/docker-project/django_app/requirements.txt /celery/
-#COPY /home/dev/docker-project/django_app/ /django_app
-#WORKDIR /django_app
-#RUN pip install -r requirements.txt
-#RUN pip install sqlalchemy
+USER celery:celery
+CMD ["celery", "-A", "django_app.celery", "worker", "-l", "info"]
