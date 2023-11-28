@@ -5,8 +5,9 @@ RUN usermod -aG webserver webserver
 
 WORKDIR /home/webserver/django_app
 COPY  --chown=webserver:webserver ./django_app/ .
+COPY --chmod=751 --chown=webserver:webserver ./scripts/start-server.sh .
 
 RUN pip install -r requirements.txt
 
 USER webserver:webserver
-CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["./start-server.sh"]
