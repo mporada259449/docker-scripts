@@ -3,13 +3,14 @@ version: "3.8"
 #logging
 #labels
 #cap_add and cap_rm
+#healthcheck
 
 #prawdopodobnie tylko manager dla database i redisa
 #dodać migrate do obrazu
 services:
   web:
     container_name: web-container
-    image: ghcr.io/mporada259449/web:1.1
+    image: ghcr.io/mporada259449/web:1.2.2
     ports:
       - "8000:8000"
     depends_on:
@@ -25,6 +26,17 @@ services:
         aliases:
           - web
           - webserver
+    secrets:
+      - DBHOST
+      - DBNAME
+      - DBPASSWORD
+      - DBPORT 
+      - DBUSER
+      - DJANGO_SECRET_KEY
+      - DJANGO_SUPERUSER_PASSWORD
+    #healthcheck:
+    #  test: ["CMD", "curl", "-f", "http://web"]
+    #  interval: 
 
   redis:
     container_name: redis
@@ -64,12 +76,20 @@ services:
     volumes:
       - "pgdata:/var/lib/postgresql/data"
     environment:
-      - POSTGRES_PASSWORD=pass
-      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD_FILE=/run/secrets/DBPASSWORD
+      - POSTGRES_USER_FILE=/run/secrets/DBUSER
+      - POSTGRES_DB_FILE=/run/secrets/DBNAME
+    secrets:
+      - DBUSER
+      - DBNAME
+      - DBPASSWORD
 
   celery:
     container_name: celery-worker
-    image: ghcr.io/mporada259449/worker:1.0.1
+    depends_on:
+      - redis
+      - postgres
+    image: ghcr.io/mporada259449/worker:1.1.1
     deploy:
       replicas: 4
       placement:
@@ -78,6 +98,13 @@ services:
       app-network:
         aliases:
           - worker
+    secrets:
+      - DBHOST
+      - DBNAME
+      - DBPASSWORD
+      - DBPORT 
+      - DBUSER
+      - DJANGO_SECRET_KEY
           
 networks:
   app-network:
@@ -88,3 +115,18 @@ volumes:
   pgdata:
     external: true
     name: pgdata
+secrets:
+  DBHOST:
+    external: true
+  DBPORT:
+    external: true
+  DBPASSWORD:
+    external: true
+  DBUSER:
+    external: true
+  DBNAME:
+    external: true
+  DJANGO_SECRET_KEY:
+    external: true
+  DJANGO_SUPERUSER_PASSWORD:
+    external: true

@@ -3,11 +3,7 @@ export DJANGO_SUPERUSER_USERNAME="root"
 export DJANGO_SUPERUSER_EMAIL="259449@student.pwr.edu.pl"
 export DJANGO_SUPERUSER_PASSWORD=$(cat /run/secrets/DJANGO_SUPERUSER_PASSWORD)
 
-rm /run/secrets/DJANGO_SUPERUSER_PASSWORD
 ./export-secrets.sh
-if ! "${?}"; then
-    echo "Could not export secrets to .env"
-fi
 
 python3 manage.py makemigrations
 python3 manage.py migrate

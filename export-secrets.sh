@@ -1,10 +1,10 @@
 #!/bin/bash
 (
-for secret in $(find run/secrets/ -type f); do
+for secret in $(find /run/secrets/ -type f); do
     echo ""${secret##*/}"='$(cat "${secret}")'" >> .env
 done
 ) &
 
 if ! wait "${!}"; then
-    exit 1
+    echo "Could not export secrets to .env"
 fi
