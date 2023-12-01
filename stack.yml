@@ -21,7 +21,7 @@ services:
       placement:
         max_replicas_per_node: 2
         constraints:
-          - "node.role==worker"
+          - "node.role==manager"
       restart_policy:
         condition: on-failure
         delay: 15s
@@ -48,8 +48,8 @@ services:
       - CHOWN
       - DAC_OVERRIDE
       - SYS_CHROOT
-#      - NET_BIND_SERVICE
-#      - NET_ADMIN
+      - NET_BIND_SERVICE
+      - NET_ADMIN
       - SYS_MODULE
     logging:
       driver: "json-file"
@@ -104,7 +104,7 @@ services:
       start_period: 4m 
 
   postgres:
-    image: postgres:latest
+    image: postgres@sha256:8b4e94a052578fa74b12b783ed633fb93c96bc6a87906ecf6b4a25382d94afcc
     ports: 
       - "5432:5432"
     deploy:
@@ -126,7 +126,7 @@ services:
         aliases:
           - postgres
     volumes:
-      - "pgdata:/var/lib/postgresql/data"
+      - "appdata:/var/lib/postgresql/data"
     environment:
       - POSTGRES_PASSWORD_FILE=/run/secrets/DBPASSWORD
       - POSTGRES_USER_FILE=/run/secrets/DBUSER
@@ -136,10 +136,9 @@ services:
       - DBNAME
       - DBPASSWORD
     cap_drop:
-      - CHOWN
       - SYS_CHROOT
-#      - NET_BIND_SERVICE
-#      - NET_ADMIN
+      - NET_BIND_SERVICE
+      - NET_ADMIN
       - SYS_MODULE
     logging:
       driver: "json-file"
@@ -188,8 +187,8 @@ services:
       - CHOWN
       - DAC_OVERRIDE
       - SYS_CHROOT
-#      - NET_BIND_SERVICE
-#      - NET_ADMIN
+      - NET_BIND_SERVICE
+      - NET_ADMIN
       - SYS_MODULE
     logging:
       driver: "json-file"
@@ -204,9 +203,9 @@ networks:
 #    driver_opts:
 #      encrypted: "true" 
 volumes:
-  pgdata:
+  appdata:
     external: true
-    name: pgdata
+    name: appdata
 secrets:
   DBHOST:
     external: true

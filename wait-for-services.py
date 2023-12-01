@@ -18,7 +18,6 @@ def check_postgres(host, port, user, dbname, password):
         conn.close()
         return True
     except:
-        print("Cannot connect to postrgresql server")
         return False
 
 def check_redis(url):
@@ -28,7 +27,6 @@ def check_redis(url):
         print("Connection to redis succeded")
         return True
     except:
-        print("Cannot connect to redis")
         return False
 
     
