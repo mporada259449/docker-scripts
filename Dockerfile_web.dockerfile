@@ -6,6 +6,7 @@ RUN usermod -aG webserver webserver
 COPY  --chown=webserver:webserver  ./django_app/ /webserver/django_app
 COPY --chmod=751 --chown=webserver:webserver ./scripts/start-server.sh /webserver/django_app
 COPY --chmod=751 --chown=webserver:webserver ./scripts/export-secrets.sh /webserver/django_app
+COPY --chown=webserver:webserver ./scripts/healthcheck_web.py /webserver/django_app
 WORKDIR /webserver/django_app
 
 RUN pip install -r requirements.txt

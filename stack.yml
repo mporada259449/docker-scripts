@@ -9,7 +9,7 @@ version: "3.8"
 #dodać migrate do obrazu
 services:
   web:
-    image: ghcr.io/mporada259449/web:1.2.4
+    image: ghcr.io/mporada259449/web:1.2.5
     ports:
       - "8000:8000"
     depends_on:
@@ -43,6 +43,7 @@ services:
       - DBUSER
       - DJANGO_SECRET_KEY
       - DJANGO_SUPERUSER_PASSWORD
+      - REDISHOST
     cap_drop:
       - CHOWN
       - DAC_OVERRIDE
@@ -55,10 +56,12 @@ services:
       options:
         max-size: "100M"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "python3", "healthcheck_web.py"]
+      interval: 2m
+      retries: 3
+      start_period: 4m 
 
-    #healthcheck:
-    #  test: ["CMD", "curl", "-f", "http://web"]
-    #  interval: 
 
   redis:
     image: redis@sha256:a954691db2c951a2b0e5de460e154e8bf3ce466c8903d4acb84a15081b38769b
@@ -94,9 +97,14 @@ services:
       options:
         max-size: "100M"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2m
+      retries: 3
+      start_period: 4m 
 
   postgres:
-    image: postgres:postgres@sha256:8b4e94a052578fa74b12b783ed633fb93c96bc6a87906ecf6b4a25382d94afcc
+    image: postgres:latest
     ports: 
       - "5432:5432"
     deploy:
@@ -137,12 +145,17 @@ services:
       options:
         max-size: "100M"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 2m
+      retries: 3
+      start_period: 4m 
 
   celery:
     depends_on:
       - redis
       - postgres
-    image: ghcr.io/mporada259449/worker:1.2.3
+    image: ghcr.io/mporada259449/worker:1.2.4
     deploy:
       replicas: 4
       placement:
@@ -169,6 +182,7 @@ services:
       - DBPORT 
       - DBUSER
       - DJANGO_SECRET_KEY
+      - REDISHOST
     cap_drop:
       - CHOWN
       - DAC_OVERRIDE
@@ -206,4 +220,6 @@ secrets:
   DJANGO_SECRET_KEY:
     external: true
   DJANGO_SUPERUSER_PASSWORD:
+    external: true
+  REDISHOST:
     external: true
