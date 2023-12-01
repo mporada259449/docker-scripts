@@ -4,6 +4,7 @@ export DJANGO_SUPERUSER_EMAIL="259449@student.pwr.edu.pl"
 export DJANGO_SUPERUSER_PASSWORD=$(cat /run/secrets/DJANGO_SUPERUSER_PASSWORD)
 
 ./export-secrets.sh
+python3 wait-for-services.py 
 
 python3 manage.py makemigrations
 python3 manage.py migrate

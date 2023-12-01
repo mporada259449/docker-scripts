@@ -6,6 +6,7 @@ RUN usermod -aG celery celery
 COPY  --chown=celery:celery ./django_app/ /celery/django_app
 COPY --chmod=751 --chown=celery:celery ./scripts/export-secrets.sh /celery/django_app
 COPY --chmod=751 --chown=celery:celery ./scripts/start-worker.sh /celery/django_app
+COPY --chmod=640 --chown=celery:celery ./scripts/wait-for-services.py /celery/django_app
 WORKDIR /celery/django_app
 
 RUN pip install -r requirements.txt

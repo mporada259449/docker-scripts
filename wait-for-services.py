@@ -6,15 +6,16 @@ import os
 
 def check_postgres(host, port, user, dbname, password):
     try:
+        print(host, port, user, dbname, password)
         conn = connect(
             host=host,
             port=port,
             user=user,
             dbname=dbname,
-            password=password,
-            timout=5
+            password=password
         )
         print("Connection to postgresql succeded")
+        conn.close()
         return True
     except:
         print("Cannot connect to postrgresql server")
@@ -23,8 +24,9 @@ def check_postgres(host, port, user, dbname, password):
 def check_redis(url):
     try:
         conn = redis.Redis.from_url(url)
-        return True
+        conn.ping()
         print("Connection to redis succeded")
+        return True
     except:
         print("Cannot connect to redis")
         return False
@@ -40,7 +42,7 @@ if __name__=="__main__":
     dbname = os.environ.get("DBNAME") 
     password = os.environ.get("DBPASSWORD")
     redis_url = os.environ.get("REDISHOST")
-
+    print(host, port, user, dbname, password)
     while not pg_isready or not redis_isready:
         pg_isready = check_postgres(host = host, 
                                     port = port,

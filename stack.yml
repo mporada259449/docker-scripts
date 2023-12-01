@@ -9,7 +9,7 @@ version: "3.8"
 #dodać migrate do obrazu
 services:
   web:
-    image: ghcr.io/mporada259449/web:1.2.5
+    image: ghcr.io/mporada259449/web:2.0
     ports:
       - "8000:8000"
     depends_on:
@@ -48,8 +48,8 @@ services:
       - CHOWN
       - DAC_OVERRIDE
       - SYS_CHROOT
-      - NET_BIND_SERVICE
-      - NET_ADMIN
+#      - NET_BIND_SERVICE
+#      - NET_ADMIN
       - SYS_MODULE
     logging:
       driver: "json-file"
@@ -136,9 +136,10 @@ services:
       - DBNAME
       - DBPASSWORD
     cap_drop:
+      - CHOWN
       - SYS_CHROOT
-      - NET_BIND_SERVICE
-      - NET_ADMIN
+#      - NET_BIND_SERVICE
+#      - NET_ADMIN
       - SYS_MODULE
     logging:
       driver: "json-file"
@@ -155,7 +156,7 @@ services:
     depends_on:
       - redis
       - postgres
-    image: ghcr.io/mporada259449/worker:1.2.4
+    image: ghcr.io/mporada259449/worker:2.0
     deploy:
       replicas: 4
       placement:
@@ -187,8 +188,8 @@ services:
       - CHOWN
       - DAC_OVERRIDE
       - SYS_CHROOT
-      - NET_BIND_SERVICE
-      - NET_ADMIN
+#      - NET_BIND_SERVICE
+#      - NET_ADMIN
       - SYS_MODULE
     logging:
       driver: "json-file"
