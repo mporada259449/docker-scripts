@@ -1,3 +1,3 @@
 #!/bin/bash
-./export-secret.sh
+./export-secrets.sh
 celery -A django_app.celery worker -l info

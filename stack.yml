@@ -9,8 +9,7 @@ version: "3.8"
 #dodać migrate do obrazu
 services:
   web:
-    container_name: web-container
-    image: ghcr.io/mporada259449/web:1.2.2
+    image: ghcr.io/mporada259449/web:1.2.4
     ports:
       - "8000:8000"
     depends_on:
@@ -20,7 +19,17 @@ services:
     deploy:
       replicas: 3
       placement:
-        max_replicas_per_node: 1
+        max_replicas_per_node: 2
+        constraints:
+          - "node.role==worker"
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        window: 60s
+      resources:
+        limits: 
+          cpus: '0.25'
+          memory: 500m
     networks:
       app-network:
         aliases:
@@ -34,15 +43,29 @@ services:
       - DBUSER
       - DJANGO_SECRET_KEY
       - DJANGO_SUPERUSER_PASSWORD
+    cap_drop:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SYS_CHROOT
+      - NET_BIND_SERVICE
+      - NET_ADMIN
+      - SYS_MODULE
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100M"
+        max-file: "5"
+
     #healthcheck:
     #  test: ["CMD", "curl", "-f", "http://web"]
     #  interval: 
 
   redis:
-    container_name: redis
-    image: redis
+    image: redis@sha256:a954691db2c951a2b0e5de460e154e8bf3ce466c8903d4acb84a15081b38769b
+    ports: 
+      - "6379:6379"
     deploy:
-      replicas: 2
+      replicas: 1
       placement:
         max_replicas_per_node: 1
         constraints:
@@ -51,14 +74,31 @@ services:
         condition: on-failure
         window: 60s
         delay: 5s
+      resources:
+        limits: 
+          cpus: '0.25'
+          memory: 500m
     networks:
       app-network:
         aliases:
           - redis
+    cap_drop:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SYS_CHROOT
+      - NET_BIND_SERVICE
+      - NET_ADMIN
+      - SYS_MODULE
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100M"
+        max-file: "5"
 
   postgres:
-    container_name: postgres
-    image: postgres
+    image: postgres:postgres@sha256:8b4e94a052578fa74b12b783ed633fb93c96bc6a87906ecf6b4a25382d94afcc
+    ports: 
+      - "5432:5432"
     deploy:
       placement:
         max_replicas_per_node: 1
@@ -69,6 +109,10 @@ services:
         condition: on-failure
         window: 60s
         delay: 5s
+      resources:
+        limits: 
+          cpus: '0.25'
+          memory: 500m
     networks:
       app-network:
         aliases:
@@ -83,21 +127,41 @@ services:
       - DBUSER
       - DBNAME
       - DBPASSWORD
+    cap_drop:
+      - SYS_CHROOT
+      - NET_BIND_SERVICE
+      - NET_ADMIN
+      - SYS_MODULE
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100M"
+        max-file: "5"
 
   celery:
-    container_name: celery-worker
     depends_on:
       - redis
       - postgres
-    image: ghcr.io/mporada259449/worker:1.1.1
+    image: ghcr.io/mporada259449/worker:1.2.3
     deploy:
       replicas: 4
       placement:
         max_replicas_per_node: 2
+        constraints:
+          - "node.role==worker"
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        window: 60s
+      resources:
+        limits: 
+          cpus: '0.25'
+          memory: 500m
     networks:
       app-network:
         aliases:
           - worker
+          - celery-worker
     secrets:
       - DBHOST
       - DBNAME
@@ -105,12 +169,25 @@ services:
       - DBPORT 
       - DBUSER
       - DJANGO_SECRET_KEY
+    cap_drop:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SYS_CHROOT
+      - NET_BIND_SERVICE
+      - NET_ADMIN
+      - SYS_MODULE
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100M"
+        max-file: "5"
           
 networks:
   app-network:
     driver: overlay
-    driver_opts:
-      encrypted: "true" 
+    attachable: true
+#    driver_opts:
+#      encrypted: "true" 
 volumes:
   pgdata:
     external: true
