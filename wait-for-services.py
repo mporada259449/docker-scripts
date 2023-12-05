@@ -6,7 +6,6 @@ import os
 
 def check_postgres(host, port, user, dbname, password):
     try:
-        print(host, port, user, dbname, password)
         conn = connect(
             host=host,
             port=port,
@@ -39,8 +38,7 @@ if __name__=="__main__":
     user = os.environ.get("DBUSER") 
     dbname = os.environ.get("DBNAME") 
     password = os.environ.get("DBPASSWORD")
-    redis_url = os.environ.get("REDISHOST")
-    print(host, port, user, dbname, password)
+    redis_url = "redis://"+ os.environ.get("REDISHOST")
     while not pg_isready or not redis_isready:
         pg_isready = check_postgres(host = host, 
                                     port = port,

@@ -1,15 +1,8 @@
 version: "3.8"
-#limits sprawdź
-#logging
-#labels
-#cap_add and cap_rm
-#healthcheck
 
-#prawdopodobnie tylko manager dla database i redisa
-#dodać migrate do obrazu
 services:
   web:
-    image: ghcr.io/mporada259449/web:2.0
+    image: ghcr.io/mporada259449/web:2.4
     ports:
       - "8000:8000"
     depends_on:
@@ -21,7 +14,7 @@ services:
       placement:
         max_replicas_per_node: 2
         constraints:
-          - "node.role==manager"
+          - "node.role==worker"
       restart_policy:
         condition: on-failure
         delay: 15s
@@ -65,8 +58,6 @@ services:
 
   redis:
     image: redis@sha256:a954691db2c951a2b0e5de460e154e8bf3ce466c8903d4acb84a15081b38769b
-    ports: 
-      - "6379:6379"
     deploy:
       replicas: 1
       placement:
@@ -105,8 +96,6 @@ services:
 
   postgres:
     image: postgres@sha256:8b4e94a052578fa74b12b783ed633fb93c96bc6a87906ecf6b4a25382d94afcc
-    ports: 
-      - "5432:5432"
     deploy:
       placement:
         max_replicas_per_node: 1
@@ -155,7 +144,7 @@ services:
     depends_on:
       - redis
       - postgres
-    image: ghcr.io/mporada259449/worker:2.0
+    image: ghcr.io/mporada259449/worker:2.4
     deploy:
       replicas: 4
       placement:
@@ -199,9 +188,7 @@ services:
 networks:
   app-network:
     driver: overlay
-    attachable: true
-#    driver_opts:
-#      encrypted: "true" 
+    attachable: false
 volumes:
   appdata:
     external: true
